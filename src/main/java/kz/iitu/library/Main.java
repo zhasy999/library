@@ -43,7 +43,7 @@ public class Main {
         // Users
         User user = new User();
         user.setName("Zhaskanat");
-        user.setType(Type.NEWBIE);
+        user.setType(Type.NEWBIE); // newbie can handle book 14 days
         userController.addUser(user);
 
         User user1 = new User();
