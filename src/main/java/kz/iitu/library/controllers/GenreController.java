@@ -4,13 +4,16 @@ import kz.iitu.library.models.Genre;
 import kz.iitu.library.services.GenreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
+@RestController
+@RequestMapping("/genres")
 public class GenreController {
     @Autowired
     private GenreService genreService;
 
-    public void addGenre(Genre genre){
+    @PostMapping("")
+    public void addGenre(@RequestBody Genre genre){
         if(genreService.addGenre(genre)){
             System.out.println(genre + " added");
             return;
@@ -18,10 +21,12 @@ public class GenreController {
         System.out.println("Genre already exist");
     }
 
-    public Genre findGenreByName(String name){
+    @GetMapping("/{name}")
+    public Genre findGenreByName(@PathVariable("name") String name){
         return genreService.findGenreByName(name);
     }
 
+    @DeleteMapping("/del")
     public void clear() {
         genreService.clear();
     }

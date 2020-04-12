@@ -6,13 +6,16 @@ import kz.iitu.library.models.User;
 import kz.iitu.library.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
+@RestController
+@RequestMapping("/users")
 public class UserController {
     @Autowired
     private UserService userService;
 
-    public void addUser(User user){
+    @PostMapping("/user/")
+    public void addUser(@RequestBody User user){
         if(userService.addUser(user)) {
             System.out.println("User " + user + " added");
             return;
@@ -20,7 +23,8 @@ public class UserController {
         System.out.println(user + " user already exist");
     }
 
-    public void addAuthor(Author author){
+    @PostMapping("/genre/")
+    public void addAuthor(@RequestBody Author author){
         if(userService.addAuthor(author)) {
             System.out.println(author + "Author added");
             return;
@@ -28,15 +32,17 @@ public class UserController {
         System.out.println(author + " author already exist");
     }
 
-
-    public void addBook(Long userId, Long bookId){
+    @PatchMapping("/add/")
+    public void addBook(@RequestParam("userId") Long userId,@RequestParam("bookId") Long bookId){
         userService.addBook(userId, bookId);
     }
 
-    public Author findAuthorByName(String name){
+    @GetMapping("/{name}")
+    public Author findAuthorByName(@PathVariable("name") String name){
         return userService.findAuthorByName(name);
     }
 
+    @DeleteMapping("/del")
     public void clear() {
         userService.clear();
     }
