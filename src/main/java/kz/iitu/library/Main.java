@@ -8,7 +8,7 @@ import org.hibernate.engine.internal.Collections;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 
-public class Main {
+//public class Main {
 //    public static void main(String[] args) {
 //        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(LibraryApplication.class);
 //
@@ -73,12 +73,10 @@ public class Main {
 //
 //
 //        bookController.findAllByStatus(Status.AVAILABLE);
-
-
 // Clear db
 //        bookController.clear();
 //        genreController.clear();
 //        userController.clear();
 
 //    }
-}
+//}
