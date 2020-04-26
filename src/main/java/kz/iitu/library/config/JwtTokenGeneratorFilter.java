@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 public class JwtTokenGeneratorFilter extends UsernamePasswordAuthenticationFilter {
 
-    // We use auth manager to validate the user credentials
+
     private AuthenticationManager authManager;
 
     public JwtTokenGeneratorFilter(AuthenticationManager authManager) {
@@ -39,15 +39,10 @@ public class JwtTokenGeneratorFilter extends UsernamePasswordAuthenticationFilte
             throws AuthenticationException {
 
         try {
-
-            // 1. Get credentials from request
             User creds = new ObjectMapper().readValue(request.getInputStream(), User.class);
-
-            // 2. Create auth object (contains credentials) which will be used by auth manager
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                     creds.getUsername(), creds.getPassword(), Collections.emptyList());
 
-            // 3. Authentication manager authenticate the user, and use UserDetialsServiceImpl::loadUserByUsername() method to load the user.
             return authManager.authenticate(authToken);
 
         } catch (IOException e) {
@@ -55,8 +50,6 @@ public class JwtTokenGeneratorFilter extends UsernamePasswordAuthenticationFilte
         }
     }
 
-    // Upon successful authentication, generate a token.
-    // The 'auth' passed to successfulAuthentication() is the current authenticated user.
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
                                             Authentication auth) throws IOException, ServletException {
@@ -64,12 +57,10 @@ public class JwtTokenGeneratorFilter extends UsernamePasswordAuthenticationFilte
         Long now = System.currentTimeMillis();
         String token = Jwts.builder()
                 .setSubject(auth.getName())
-                // Convert to list of strings.
-                // This is important because it affects the way we get them back in the Gateway.
                 .claim("authorities", auth.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .setIssuedAt(new Date(now))
-                .setExpiration(new Date(now + 60*60 * 1000))  // in milliseconds
+                .setExpiration(new Date(now + 60*60 * 1000))
                 .signWith(SignatureAlgorithm.HS512, "secret-key".getBytes())
                 .compact();
 

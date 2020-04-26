@@ -1,10 +1,12 @@
 package kz.iitu.library.models;
 
-
+import lombok.*;
 import javax.persistence.*;
 import java.util.List;
 
 @Entity
+@Setter
+@NoArgsConstructor
 @Table(name = "authors")
 public class Author {
     @Id
@@ -16,11 +18,17 @@ public class Author {
     public Author(String name){
         this.name = name;
     }
-    @ManyToMany(mappedBy = "authors", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Book> books;
 
-    public Author() {
+    public Long getId() {
+        return id;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    @ManyToMany(mappedBy = "authors", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    private List<Book> books;
 
     @Override
     public String toString() {
@@ -28,9 +36,5 @@ public class Author {
                 "id=" + id +
                 ", name='" + name +
                 '}';
-    }
-
-    public String getName() {
-        return name;
     }
 }

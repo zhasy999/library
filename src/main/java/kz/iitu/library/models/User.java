@@ -1,56 +1,69 @@
 package kz.iitu.library.models;
 
-
-import javax.persistence.*;
-import java.util.List;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.persistence.*;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
+@NoArgsConstructor
+@Getter
+@Setter
+@ToString(exclude = {"books", "roles"})
 @Table(name = "users")
-public class User implements UserDetails{
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-
-    @Enumerated(EnumType.STRING)
-    private Type type;
+    @Column(unique = true)
+    private String username;
+    private String password;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Book> books;
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", name='" + name +
-                ", type='" + type +
-                '}';
-    }
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "user_roles",
+            joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id")},
+            inverseJoinColumns = {@JoinColumn(name = "role_id", referencedColumnName = "id")}
+    )
+    private List<Role> roles;
+
     public void notify(Book book){
-        System.out.println("Book " + book.getTitle() + " owned" );
+        System.out.println("Книга " + book.getTitle() + " теперь у вас" );
     }
 
-    public String getName() {
-        return name;
+    public User(String username) {
+        this.username = username;
     }
 
-    public void setName(String name) {
-        this.name=name;
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles;
     }
 
-    public void setType(Type type) {
-        this.type=type;
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
     }
 
-    public Long getId() {
-        return id;
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
     }
 
-    public Type getType() {
-        return type;
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }

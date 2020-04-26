@@ -1,8 +1,11 @@
 package kz.iitu.library.services;
 
-import kz.iitu.library.models.*;
+import kz.iitu.library.models.Author;
+import kz.iitu.library.models.Book;
+import kz.iitu.library.models.Status;
 import kz.iitu.library.repo.BookRepository;
 import kz.iitu.library.repo.UserRepository;
+import kz.iitu.library.services.interfaces.BookServiceInt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +15,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-public class BookService {
+public class BookService implements BookServiceInt {
     private BookRepository bookRepository;
     private UserRepository userRepository;
 
@@ -24,69 +27,6 @@ public class BookService {
     @Autowired
     public void setUserRepository(UserRepository userRepository) {
         this.userRepository = userRepository;
-    }
-
-    @Transactional
-    public boolean addBook(Book book) {
-        if (bookRepository.findBookByTitleIgnoreCase(book.getTitle()) != null) {
-            book.setId(Long.MIN_VALUE);
-            System.out.println("Error");
-            return false;
-        }
-        book.setStatus(Status.AVAILABLE);
-        bookRepository.save(book);
-        return true;
-    }
-
-    @Transactional
-    public boolean addBookToUser(Long userId, Long bookId) {
-        if (bookRepository.findById(bookId).isEmpty() || userRepository.findById(userId).get() == null) {
-            System.out.println("Data is not right");
-            return false;
-        }
-        if (bookRepository.findById(bookId).get().getUser().getId() != userId) {
-            System.out.println("User did not requested this book");
-            return false;
-        }
-
-        Book book = bookRepository.findById(bookId).get();
-        book.setUser(userRepository.findById(userId).get());
-        book.setStatus(Status.ISSUED);
-
-        Date date = new Date();
-        Calendar instance = Calendar.getInstance();
-        instance.setTime(date);
-        if(userRepository.findById(userId).get().getType() == Type.NEWBIE)
-            instance.add(Calendar.DAY_OF_MONTH, 14);
-        if(userRepository.findById(userId).get().getType() == Type.EXPERT)
-            instance.add(Calendar.DAY_OF_MONTH, 30);
-
-        Date newDate = instance.getTime();
-        book.setGivenDate(date);
-        book.setDueDate(newDate);
-
-        bookRepository.save(book);
-        return true;
-    }
-
-    @Transactional
-    public boolean returnBookFromUser(Long userId, Long bookId) {
-        if (bookRepository.findById(bookId).isEmpty() || userRepository.findById(userId).get() == null) {
-            System.out.println("Error");
-            return false;
-        }
-        if (bookRepository.findById(bookId).get().getUser() != userRepository.findById(userId).get()) {
-            System.out.println("Error");
-            return false;
-        }
-
-        Book book = bookRepository.findById(bookId).get();
-        book.setUser(null);
-        book.setDueDate(null);
-        book.setGivenDate(null);
-        book.setStatus(Status.AVAILABLE);
-        bookRepository.save(book);
-        return true;
     }
 
     @Transactional
@@ -102,26 +42,89 @@ public class BookService {
         }
         return bookRepository.findAllByStatus(status);
     }
-
     @Transactional
     public Book findBookByName(String title) {
         return bookRepository.findBookByTitleIgnoreCase(title);
     }
+    @Transactional
+    public Book findBookById(Long id) {
+        return bookRepository.findById(id).get();
+    }
+    @Transactional
+    public List<Book> findAll() {
+        List<Book> books = bookRepository.findAll();
+        return books;
+    }
+    @Transactional
+    public List<Book> findAllByAuthor(Author author) {
+        return bookRepository.findAllByAuthorsContaining(author);
+    }
 
+
+
+
+
+    @Transactional
+    public boolean addBook(Book book) {
+        if (bookRepository.findBookByTitleIgnoreCase(book.getTitle()) != null) {
+            book.setId(Long.MIN_VALUE);
+            System.out.println("Error");
+            return false;
+        }
+        book.setStatus(Status.AVAILABLE);
+        bookRepository.save(book);
+        return true;
+    }
+    @Transactional
+    public boolean addBookToUser(Long userId, Long bookId) {
+        if (bookRepository.findById(bookId).isEmpty() || userRepository.findById(userId).get() == null) {
+            System.out.println("Нету таких данных");
+            return false;
+        }
+        if (bookRepository.findById(bookId).get().getUser().getId() != userId) {
+            System.out.println("Этот клиент не запрашивал книгу");
+            return false;
+        }
+        Book book = bookRepository.findById(bookId).get();
+        book.setUser(userRepository.findById(userId).get());
+        book.setStatus(Status.ISSUED);
+
+        Date date = new Date();
+        Calendar instance = Calendar.getInstance();
+        instance.setTime(date);
+//        if(userRepository.findById(userId).get().getType() == Type.NEWBIE) instance.add(Calendar.DAY_OF_MONTH, 14);
+//        if(userRepository.findById(userId).get().getType() == Type.EXPERT) instance.add(Calendar.DAY_OF_MONTH, 30);
+
+        Date newDate = instance.getTime();
+        book.setGivenDate(date);
+        book.setDueDate(newDate);
+
+        bookRepository.save(book);
+        return true;
+    }
+    @Transactional
+    public boolean returnBookFromUser(Long userId, Long bookId) {
+        if (bookRepository.findById(bookId).isEmpty() || userRepository.findById(userId).get() == null) {
+            System.out.println("Error");
+            return false;
+        }
+        if (bookRepository.findById(bookId).get().getUser() != userRepository.findById(userId).get()) {
+            System.out.println("Error");
+            return false;
+        }
+        Book book = bookRepository.findById(bookId).get();
+        book.setUser(null);
+        book.setDueDate(null);
+        book.setGivenDate(null);
+        book.setStatus(Status.AVAILABLE);
+        bookRepository.save(book);
+        return true;
+    }
     @Transactional
     public void save(Book book) {
         bookRepository.save(book);
     }
 
-    @Transactional
-    public Book findBookById(Long id) {
-        return bookRepository.findById(id).get();
-    }
-
-    @Transactional
-    public Book findBookByAuthor(Author author) {
-        return bookRepository.findBookByAuthorsContaining(author);
-    }
 
     @Transactional
     public void clear() {
@@ -131,5 +134,10 @@ public class BookService {
             bookRepository.save(b);
         }
         bookRepository.deleteAll();
+    }
+
+    @Override
+    public Long deleteBookByName(String title) {
+        return bookRepository.deleteBookByTitleIgnoreCase(title);
     }
 }

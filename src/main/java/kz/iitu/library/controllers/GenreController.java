@@ -3,7 +3,6 @@ package kz.iitu.library.controllers;
 import kz.iitu.library.models.Genre;
 import kz.iitu.library.services.GenreService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

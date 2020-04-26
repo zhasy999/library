@@ -12,34 +12,25 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-
     @Autowired
     private UserService userService;
-
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/auth/**").permitAll()
-                .antMatchers("/users/hello/**").permitAll()
-                .antMatchers("/users/create").hasAuthority("ADMIN")
+                .antMatchers("/user", "/book", "/v2/api-docs").permitAll()
+                .antMatchers("/user/create").hasAnyAuthority("ADMIN")
                 .anyRequest().authenticated()
-                .and()
-                // What's the authenticationManager()?
-                // An object provided by WebSecurityConfigurerAdapter, used to authenticate the user passing user's credentials
-                // The filter needs this auth manager to authenticate the user.
-                .addFilter(new JwtTokenGeneratorFilter(authenticationManager()))
+                .and().formLogin()
 
-                // Add a filter to validate the tokens with every request
-                .addFilterAfter(new JwtTokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        ;
     }
 
     @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
+    public BCryptPasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
-
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userService)

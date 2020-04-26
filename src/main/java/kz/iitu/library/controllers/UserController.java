@@ -1,11 +1,9 @@
 package kz.iitu.library.controllers;
 
 import kz.iitu.library.models.Author;
-import kz.iitu.library.models.Book;
 import kz.iitu.library.models.User;
 import kz.iitu.library.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
